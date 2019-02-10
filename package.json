@@ -1,0 +1,15 @@
+{
+  "name": "medsdb",
+  "version": "1.0.0",
+  "description": "App for tracking med schedules.",
+  "main": "serve.js",
+  "dependencies": {
+    "express": "^4.16.4"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "node serve.js"
+  },
+  "author": "Indy Ray",
+  "license": "ISC"
+}
