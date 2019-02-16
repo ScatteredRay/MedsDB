@@ -8,7 +8,7 @@ function onAllReady() {
     console.log("All ready.");
 }
 
-firebaseScript.then(() => {
+var DBPromise = firebaseScript.then(() => {
     var config = {
         apiKey: "AIzaSyCQj7xr0sOQ8XnlvH6KphMgHsh_SVrAZAY",
         authDomain: "medsdb-6e5d9.firebaseapp.com",
@@ -20,6 +20,39 @@ firebaseScript.then(() => {
     firebase.initializeApp(config);
 
     console.log("firebase initialized.");
+});
+
+Promise.all([preactScript, DBPromise]) .then(() => {
+    var db = firebase.firestore();
+
+    console.log("begin render.");
+
+    class MedEntry extends preact.Component {
+        constructor(name) {
+            super();
+            this.state.name = name;
+        }
+        render(props, state) {
+            console.log("render");
+            return preact.h('div', {id: "main"}, "hai");//state.name)
+        }
+    }
+
+    console.dir(db);
+    console.dir(db.collection("medications"));
+
+    db.collection("medications").onSnapshot((query) => {
+        console.dir(query);
+        query.forEach((doc) => {
+            const entry = new MedEntry(doc.data().name);
+            preact.render(preact.h('MedEntry'),
+                          document.body);
+            console.log(`${doc.id} => ${doc.data().name}`);
+        });
+    },
+    (err) => {
+        console.log(err);
+    });
 });
 
 console.log("main done.");
