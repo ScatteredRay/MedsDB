@@ -27,32 +27,55 @@ Promise.all([preactScript, DBPromise]) .then(() => {
 
     console.log("begin render.");
 
-    class MedEntry extends preact.Component {
-        constructor(name) {
+    const MedEntry = (props) => {
+            console.log("render " + props.name);
+            return preact.h('div', {id: "main"}, props.name)
+    };
+
+    class MedList extends preact.Component {
+        constructor() {
+            console.log("Construct");
+            //console.dir(state);
             super();
-            this.state.name = name;
+            db.collection("medications").onSnapshot((query) => {
+                var meds = [];
+                console.dir(query);
+                query.forEach((doc) => {
+                    console.dir(doc);
+                    meds.push(doc.data());
+                });
+                console.log("medS");
+                meds.map((med) => { console.log(med); });
+                this.setState({"meds": meds});
+            },
+            (err) => {
+                console.log(err);
+            });
         }
+
         render(props, state) {
-            console.log("render");
-            return preact.h('div', {id: "main"}, "hai");//state.name)
+            console.log("medlist render");
+            console.dir(state);
+            var meds = "main";
+            if(typeof(state.meds) !== 'undefined') {
+                meds = state.meds.map((med) => {
+                    console.log("map");
+                    console.dir(med);
+                    //return MedEntry(med);
+                    return preact.h(MedEntry, med);
+                });
+            }
+            //var meds = "ho";
+            return preact.h('div', {id: "main"}, meds);
         }
     }
+
+    //preact.render(preact.h(MedList), document.body);
+    preact.render(preact.h('div', {}, preact.h(MedList)), document.body);
 
     console.dir(db);
     console.dir(db.collection("medications"));
 
-    db.collection("medications").onSnapshot((query) => {
-        console.dir(query);
-        query.forEach((doc) => {
-            const entry = new MedEntry(doc.data().name);
-            preact.render(preact.h('MedEntry'),
-                          document.body);
-            console.log(`${doc.id} => ${doc.data().name}`);
-        });
-    },
-    (err) => {
-        console.log(err);
-    });
 });
 
 console.log("main done.");
